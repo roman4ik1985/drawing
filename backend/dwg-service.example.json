@@ -1,0 +1,22 @@
+{
+  "host": "127.0.0.1",
+  "port": 8765,
+  "converter": {
+    "command_template": [
+      "C:\\Program Files\\ODA\\ODAFileConverter\\ODAFileConverter.exe",
+      "{source_dir}",
+      "{target_dir}",
+      "{output_version}",
+      "{output_format}",
+      "{recursive_flag}",
+      "{audit_flag}",
+      "{input_filter}"
+    ],
+    "input_filter": "*.dxf",
+    "output_version": "ACAD2018",
+    "recursive_flag": "0",
+    "audit_flag": "1",
+    "output_format": "DWG",
+    "output_extension": ".dwg"
+  }
+}

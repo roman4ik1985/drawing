@@ -1,0 +1,10 @@
+build/
+dist/
+__pycache__/
+*.py[cod]
+*.log
+backend/dwg-service.json
+.venv/
+venv/
+Thumbs.db
+.DS_Store
