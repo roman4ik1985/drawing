@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Учебное двумерное черчение</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="top-chrome">
+      <div class="title-row">
+        <div>
+          <h1>Учебное двумерное черчение</h1>
+          <p id="documentTitle">Документ: Без имени</p>
+        </div>
+        <div class="zoom-controls">
+          <button type="button" data-command="zoom-out">-</button>
+          <label for="zoomRange">Масштаб</label>
+          <input id="zoomRange" type="range" min="25" max="400" step="25" value="100">
+          <span id="zoomValue">100%</span>
+          <button type="button" data-command="zoom-in">+</button>
+          <button type="button" data-command="fit">По размеру</button>
+        </div>
+      </div>
+
+      <nav class="menu-bar" aria-label="Главное меню">
+        <details class="menu">
+          <summary>Файл</summary>
+          <div class="menu-items">
+            <button type="button" data-command="new-document">Новый</button>
+            <button type="button" data-command="open-document">Открыть</button>
+            <button type="button" data-command="save-document">Сохранить</button>
+            <button type="button" data-command="save-as-document">Сохранить как</button>
+            <button type="button" data-command="export-dxf">Экспорт DXF</button>
+            <button type="button" data-command="export-dwg" title="Требуется локальный DWG backend">Экспорт DWG</button>
+            <button type="button" data-command="export-svg">Экспорт SVG</button>
+            <button type="button" data-command="export-png">Экспорт PNG</button>
+            <button type="button" data-command="export-tiff">Экспорт TIFF</button>
+            <button type="button" data-command="toggle-print-preview">Предпросмотр</button>
+            <button type="button" data-command="print-document">Печать</button>
+          </div>
+        </details>
+        <details class="menu">
+          <summary>Правка</summary>
+          <div class="menu-items">
+            <button type="button" data-command="undo">Отменить</button>
+            <button type="button" data-command="redo">Повторить</button>
+            <button type="button" data-command="duplicate-selection">Копировать</button>
+            <button type="button" data-command="delete-selection">Удалить</button>
+            <button type="button" data-command="select-all">Выделить всё</button>
+            <button type="button" data-command="clear-selection">Снять выделение</button>
+          </div>
+        </details>
+        <details class="menu">
+          <summary>Вид</summary>
+          <div class="menu-items">
+            <button type="button" data-command="fit">Показать полностью</button>
+            <button type="button" data-command="toggle-grid">Сетка</button>
+            <button type="button" data-command="toggle-rulers">Линейки</button>
+            <button type="button" data-command="toggle-toolbar">Панель инструментов</button>
+          </div>
+        </details>
+        <details class="menu">
+          <summary>Рисование</summary>
+          <div class="menu-items">
+            <button type="button" data-tool="select">Выделение</button>
+            <button type="button" data-tool="line">Линия</button>
+            <button type="button" data-tool="polyline">Ломаная</button>
+            <button type="button" data-tool="rect">Прямоугольник</button>
+            <button type="button" data-tool="circle">Окружность</button>
+            <button type="button" data-tool="point">Точка</button>
+            <button type="button" data-tool="text">Текст</button>
+          </div>
+        </details>
+        <details class="menu">
+          <summary>Редактирование объектов</summary>
+          <div class="menu-items">
+            <button type="button" data-command="move-mode">Перемещение</button>
+            <button type="button" data-command="duplicate-selection">Копирование</button>
+            <button type="button" data-command="rotate-selection">Поворот</button>
+            <button type="button" data-command="scale-selection">Масштабирование</button>
+            <button type="button" data-command="mirror-selection-x">Отразить по X</button>
+            <button type="button" data-command="mirror-selection-y">Отразить по Y</button>
+            <button type="button" data-command="trim-selection">Обрезка</button>
+            <button type="button" data-command="extend-selection">Продление</button>
+            <button type="button" data-command="offset-selection">Смещение</button>
+            <button type="button" data-command="split-selection">Разделение</button>
+          </div>
+        </details>
+        <details class="menu">
+          <summary>Размеры</summary>
+          <div class="menu-items">
+            <button type="button" data-tool="dim-linear">Линейный</button>
+            <button type="button" data-tool="dim-horizontal">Горизонтальный</button>
+            <button type="button" data-tool="dim-vertical">Вертикальный</button>
+            <button type="button" data-tool="dim-radius">Радиус</button>
+            <button type="button" data-tool="dim-diameter">Диаметр</button>
+          </div>
+        </details>
+        <details class="menu">
+          <summary>Инструменты</summary>
+          <div class="menu-items">
+            <button type="button" data-tool="measure-distance">Измерить расстояние</button>
+            <button type="button" data-tool="measure-angle">Измерить угол</button>
+            <button type="button" data-tool="measure-coords">Координаты точки</button>
+            <button type="button" data-command="open-calculator">Вычисления</button>
+          </div>
+        </details>
+        <details class="menu">
+          <summary>Привязка</summary>
+          <div class="menu-items">
+            <label><input type="checkbox" id="snapGridToggle" checked> К сетке</label>
+            <label><input type="checkbox" id="snapEndToggle" checked> Конечные точки</label>
+            <label><input type="checkbox" id="snapMidToggle" checked> Середины</label>
+            <label><input type="checkbox" id="snapIntersectionToggle" checked> Пересечения</label>
+            <label><input type="checkbox" id="snapCenterToggle" checked> Центры</label>
+            <label><input type="checkbox" id="orthoToggle"> Ортогональный режим</label>
+          </div>
+        </details>
+        <details class="menu">
+          <summary>Настройки</summary>
+          <div class="menu-items settings-menu">
+            <label>Единицы
+              <select id="unitsSelect">
+                <option value="mm">мм</option>
+                <option value="cm">см</option>
+                <option value="px">px</option>
+              </select>
+            </label>
+            <label>Шаг сетки
+              <input id="gridStepInput" type="number" min="5" step="5" value="25">
+            </label>
+            <label>Толщина линии
+              <input id="strokeWidthInput" type="number" min="1" max="12" value="2">
+            </label>
+            <label>Тип линии
+              <select id="lineTypeSelect">
+                <option value="solid">Сплошная</option>
+                <option value="dashed">Штриховая</option>
+                <option value="dotted">Точечная</option>
+                <option value="dashdot">Штрихпунктирная</option>
+              </select>
+            </label>
+            <label>Цвет линии
+              <input id="strokeColorInput" type="color" value="#1f2937">
+            </label>
+            <label>Размер текста
+              <input id="textSizeInput" type="number" min="8" max="72" value="18">
+            </label>
+            <label>Автосохранение, мин
+              <input id="autosaveInput" type="number" min="1" max="60" value="2">
+            </label>
+          </div>
+        </details>
+        <details class="menu">
+          <summary>Справка</summary>
+          <div class="menu-items">
+            <button type="button" data-command="show-help">Руководство</button>
+            <button type="button" data-command="load-demo">Демонстрационный чертёж</button>
+            <button type="button" data-command="show-about">О программе</button>
+          </div>
+        </details>
+      </nav>
+
+      <section id="toolbar" class="tool-bar" aria-label="Панель инструментов">
+        <button type="button" data-command="new-document" title="Новый">Новый</button>
+        <button type="button" data-command="open-document" title="Открыть">Открыть</button>
+        <button type="button" data-command="save-document" title="Сохранить">Сохранить</button>
+        <button type="button" data-command="undo" title="Отменить">Отменить</button>
+        <button type="button" data-command="redo" title="Повторить">Повторить</button>
+        <span class="divider"></span>
+        <button type="button" data-tool="select" title="Выделение">Выделение</button>
+        <button type="button" data-tool="line" title="Линия">Линия</button>
+        <button type="button" data-tool="polyline" title="Ломаная">Ломаная</button>
+        <button type="button" data-tool="rect" title="Прямоугольник">Прямоугольник</button>
+        <button type="button" data-tool="circle" title="Окружность">Окружность</button>
+        <button type="button" data-tool="point" title="Точка">Точка</button>
+        <button type="button" data-tool="text" title="Текст">Текст</button>
+        <span class="divider"></span>
+        <button type="button" data-tool="dim-linear" title="Линейный размер">Размер</button>
+        <button type="button" data-tool="measure-distance" title="Измерить расстояние">Дистанция</button>
+        <button type="button" data-command="toggle-grid" title="Показать сетку">Сетка</button>
+        <button type="button" data-command="toggle-snap" title="Переключить привязку к сетке">Привязка</button>
+      </section>
+
+      <section id="printPreviewPanel" class="print-preview-panel hidden" aria-label="Параметры предпросмотра печати">
+        <strong>Предпросмотр печати</strong>
+        <label>Масштаб, %
+          <input id="printScaleInput" type="number" min="10" max="400" step="5" value="100">
+        </label>
+        <label>Цвет
+          <select id="printColorModeSelect">
+            <option value="color">Цветной</option>
+            <option value="bw">Черно-белый</option>
+          </select>
+        </label>
+        <button type="button" id="printNowButton">Печать</button>
+      </section>
+    </header>
+
+    <main class="workspace-layout">
+      <section class="drafting-shell">
+        <div class="ruler-corner" id="rulerCorner"></div>
+        <canvas id="topRuler" class="top-ruler" width="1200" height="32"></canvas>
+        <canvas id="leftRuler" class="left-ruler" width="32" height="900"></canvas>
+        <div id="workspaceViewport" class="workspace-viewport">
+          <svg id="drawingSurface" xmlns="http://www.w3.org/2000/svg" aria-label="Рабочая область">
+            <defs>
+              <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b5cf6"></path>
+              </marker>
+            </defs>
+            <g id="cameraLayer">
+              <g id="gridLayer"></g>
+              <g id="entityLayer"></g>
+              <g id="overlayLayer"></g>
+            </g>
+          </svg>
+          <div id="printPreviewHost" class="print-preview-host hidden" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="panel-block">
+          <h2>Состояние</h2>
+          <dl class="status-grid">
+            <div><dt>Режим</dt><dd id="activeMode">Выделение</dd></div>
+            <div><dt>Курсор</dt><dd id="cursorCoords">0, 0</dd></div>
+            <div><dt>Привязка</dt><dd id="snapSummary">Сетка, конечные точки, середины, пересечения, центры</dd></div>
+            <div><dt>Автосохранение</dt><dd id="autosaveStatus">не выполнялось</dd></div>
+            <div><dt>DWG backend</dt><dd id="dwgBackendStatus">проверка...</dd></div>
+          </dl>
+        </section>
+
+        <section class="panel-block">
+          <h2>Параметры объекта</h2>
+          <div id="selectionSummary" class="selection-summary">Ничего не выбрано.</div>
+          <label>Цвет выбранного
+            <input id="selectionColorInput" type="color" value="#1f2937">
+          </label>
+          <label>Толщина выбранного
+            <input id="selectionStrokeWidthInput" type="number" min="1" max="12" value="2">
+          </label>
+          <label>Тип линии выбранного
+            <select id="selectionLineTypeInput">
+              <option value="solid">Сплошная</option>
+              <option value="dashed">Штриховая</option>
+              <option value="dotted">Точечная</option>
+              <option value="dashdot">Штрихпунктирная</option>
+            </select>
+          </label>
+          <label>Текст
+            <input id="selectionTextInput" type="text" placeholder="Для текстовых объектов">
+          </label>
+          <button type="button" id="applySelectionProperties">Применить к выделению</button>
+        </section>
+
+        <section class="panel-block">
+          <h2>Вычисления и измерения</h2>
+          <label>Выражение
+            <input id="calculatorInput" type="text" placeholder="Например: (125 + 50) / 5">
+          </label>
+          <button type="button" id="calculatorButton">Вычислить</button>
+          <p id="calculatorResult">Результат появится здесь.</p>
+          <p id="measurementResult">Измерения ещё не выполнялись.</p>
+        </section>
+
+        <section class="panel-block help-block">
+          <h2>Справка</h2>
+          <p>ЛКМ создаёт точки построения. В режиме выделения перетаскивайте объекты мышью.</p>
+          <p><strong>Enter</strong> завершает ломаную, <strong>Esc</strong> отменяет текущую команду, <strong>Delete</strong> удаляет выделение.</p>
+          <p><strong>Ctrl+Z</strong> и <strong>Ctrl+Y</strong> управляют историей, <strong>Ctrl+S</strong> сохраняет документ.</p>
+        </section>
+      </aside>
+    </main>
+
+    <section class="footer-chrome" aria-label="Нижняя панель">
+      <section id="commandBar" class="command-bar" aria-label="Параметры построения">
+        <div class="command-bar-meta">
+          <strong id="commandBarTitle">Параметры построения</strong>
+          <span id="commandBarHint">Выберите инструмент рисования, чтобы задать точные параметры построения.</span>
+        </div>
+        <div class="command-bar-fields">
+          <label class="command-field" data-command-field="length">Длина
+            <input id="drawLengthInput" type="number" min="0" step="1" placeholder="Например 120">
+          </label>
+          <label class="command-field" data-command-field="width">Ширина
+            <input id="rectWidthInput" type="number" min="0" step="1" placeholder="Ширина">
+          </label>
+          <label class="command-field" data-command-field="height">Высота
+            <input id="rectHeightInput" type="number" min="0" step="1" placeholder="Высота">
+          </label>
+          <label class="command-field" data-command-field="radius">Радиус
+            <input id="circleRadiusInput" type="number" min="0" step="1" placeholder="Например 30">
+          </label>
+          <label class="command-field" data-command-field="anchor">Точка привязки
+            <select id="drawAnchorSelect">
+              <option value="start">Начало</option>
+              <option value="end">Конец</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="sheet-bar" aria-label="Листы документа">
+        <div id="sheetTabs" class="sheet-tabs"></div>
+        <div class="sheet-actions">
+          <button type="button" id="addSheetButton">+ Лист</button>
+          <button type="button" id="renameSheetButton">Переименовать</button>
+          <button type="button" id="deleteSheetButton">Удалить</button>
+        </div>
+      </section>
+
+      <footer class="status-bar">
+        <span id="statusMessage">Готово.</span>
+        <span id="selectionCount">Выделено: 0</span>
+        <span id="documentStats">Объектов: 0</span>
+      </footer>
+    </section>
+  </div>
+
+  <dialog id="helpDialog">
+    <article>
+      <h2>Руководство пользователя</h2>
+      <p>Программа предназначена для учебного двумерного черчения и поддерживает базовые операции построения, редактирования, нанесения размеров, измерения и сохранения чертежей.</p>
+      <ul>
+        <li>Разделы главного меню повторяют основные функции программы.</li>
+        <li>Панель инструментов даёт быстрый доступ к созданию документа, сохранению, рисованию, размерам и сетке.</li>
+        <li>В правой панели доступны параметры выбранных объектов, калькулятор, результаты измерений и краткая справка.</li>
+        <li>Режимы привязки и ортогональный режим включаются через меню «Привязка».</li>
+        <li>Демонстрационный чертёж загружается через меню «Справка».</li>
+      </ul>
+      <h3>Горячие клавиши</h3>
+      <ul>
+        <li><strong>Ctrl+S</strong> сохранить документ</li>
+        <li><strong>Ctrl+O</strong> открыть документ</li>
+        <li><strong>Ctrl+Z</strong> отменить</li>
+        <li><strong>Ctrl+Y</strong> повторить</li>
+        <li><strong>Delete</strong> удалить выбранные объекты</li>
+        <li><strong>Enter</strong> завершить ломаную</li>
+        <li><strong>Esc</strong> отменить текущую команду</li>
+      </ul>
+      <form method="dialog">
+        <button type="submit">Закрыть</button>
+      </form>
+    </article>
+  </dialog>
+
+  <dialog id="saveAsDialog">
+    <article>
+      <h2>Сохранить как</h2>
+      <form id="saveAsForm" class="dialog-form">
+        <label>Имя файла
+          <input id="saveAsNameInput" type="text" value="drawing" required>
+        </label>
+        <label>Формат
+          <select id="saveAsFormatSelect">
+            <option value="dxf">DXF</option>
+            <option value="dwg" disabled>DWG</option>
+            <option value="svg">SVG</option>
+            <option value="png">PNG</option>
+            <option value="tiff">TIFF</option>
+          </select>
+        </label>
+        <p id="saveAsHint">Для DWG нужен локальный backend и внешний конвертер.</p>
+        <div class="dialog-actions">
+          <button type="submit">Сохранить</button>
+          <button type="button" id="saveAsCancelButton">Отмена</button>
+        </div>
+      </form>
+    </article>
+  </dialog>
+
+  <input id="fileInput" type="file" accept=".json,application/json" hidden>
+
+  <script src="app.js"></script>
+</body>
+</html>

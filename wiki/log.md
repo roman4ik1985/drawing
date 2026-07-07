@@ -1,0 +1,1 @@
+- [2026-07-05 08:30] config - AGENTS.md, .agents/templates/AGENTS.base.md, scripts/New-CodexProject.ps1, scripts/append-wiki-log.ps1, wiki/*, raw/* - Transferred Codex starter pack and initialized base wiki/raw structure.
