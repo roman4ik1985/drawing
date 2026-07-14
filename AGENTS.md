@@ -47,3 +47,16 @@ Base operating rules for a new project initialized from the Codex project templa
    - number of steps
    - percent of a 5-hour budget
 3. Right after those lines, add a short breakdown through slices/packages or numbered items.
+4. After each priority label `must-have`, `should-have`, `polish`, immediately include `(steps, budget)`.
+5. If the user writes `police` in the context of the priority scale, treat it as an obvious typo for `polish` unless the surrounding context clearly means something else.
+6. After slices/packages/chunks that are proposed as the next action scope, also include `(steps, budget)`.
+7. The `(steps, budget)` tuple always contains exactly two numbers in this order:
+   - number of steps
+   - percent of a 5-hour budget
+8. Inside `(steps, budget)`, do not write words, `%`, or extra explanation.
+
+## Action Marker Policy
+1. A trailing `!!` is an explicit action marker for short user commands.
+2. If the user writes a short command ending with `!!`, treat it as a command to execute, not a question, brainstorm prompt, or request to only estimate.
+3. Examples: `must-have!!`, `should-have!!`, `polish!!`, `P01-P03!!`, `do it!!`.
+4. The `!!` marker does not override safety, scope, branch, or approval constraints. If execution is risky or blocked, state the blocker briefly and ask only the required question.
