@@ -42,16 +42,45 @@ python -m http.server 8000
 
 Проект можно использовать как обычную веб-страницу, но для Windows также поддержана сборка `exe`.
 
-1. Убедитесь, что установлен Python и доступны зависимости для сборки.
-2. Запустите из `C:\drawing`:
+1. Убедитесь, что установлен Python.
+2. При первом запуске один раз установите desktop-зависимости:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File C:\drawing\build_exe.ps1 -BootstrapDependencies
+```
+
+3. Запустите обычную сборку:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File C:\drawing\build_exe.ps1
 ```
 
-3. Готовый файл приложения появится в каталоге `C:\drawing\dist`.
+4. Готовый файл приложения появится в каталоге `C:\drawing\dist`.
+
+Обычная пересборка не переустанавливает `pywebview`/`pyinstaller` и не перегенерирует `assets/drawing_app.ico`. Для осознанного обновления иконки используйте `-RegenerateIcon`.
+
+Сама сборка не требует локального `backend/dwg-service.json`. Desktop-приложение поднимет встроенный DWG backend только если конфиг указан через `DRAWING_DWG_CONFIG` или существует локальный `backend/dwg-service.json`.
 
 Каталоги `build/` и `dist/` считаются артефактами сборки и не должны коммититься в репозиторий.
+
+## Smoke-проверки
+
+Для browser/runtime smoke используйте:
+
+```powershell
+$env:NODE_PATH='C:\Users\roman\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules;C:\Users\roman\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules\.pnpm\node_modules'
+C:\Users\roman\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe C:\drawing\scripts\regression-smoke.js
+```
+
+Сценарий проверяет геометрию, импорт JSON, сохранение, `Save As`, `DWG offline/online` и `print preview`.
+
+Для desktop smoke после сборки используйте:
+
+```powershell
+pwsh -ExecutionPolicy Bypass -File C:\drawing\scripts\desktop-smoke.ps1
+```
+
+Скрипт сам создаёт временный mock-конфиг, запускает `DrawingApp.exe`, проверяет UI-порт и ответ встроенного backend на `127.0.0.1:8765`, а затем завершает процесс и удаляет временные файлы. Для этого smoke нужен PowerShell 7+.
 
 ## Правила репозитория
 

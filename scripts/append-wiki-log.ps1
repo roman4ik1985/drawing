@@ -10,10 +10,14 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Summary,
 
-    [string]$LogPath = 'C:\my-erp-system\wiki\log.md'
+    [string]$LogPath = ''
 )
 
 $importantTypes = @('implementation', 'config', 'handoff')
+
+if (-not $LogPath) {
+    $LogPath = [System.IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $PSCommandPath) '..\wiki\log.md'))
+}
 
 if (-not (Test-Path -LiteralPath $LogPath)) {
     throw "Log file not found: $LogPath"

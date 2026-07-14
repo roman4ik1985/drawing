@@ -1571,14 +1571,16 @@ function extendSelection() {
     setStatus("Не удалось вычислить точку продления.");
     return;
   }
-  const d1 = distance({ x: target.x1, y: target.y1 }, intersection);
-  const d2 = distance({ x: target.x2, y: target.y2 }, intersection);
-  if (d1 > d2) {
+  const extensionEnd = getLineExtensionEnd(target, intersection);
+  if (extensionEnd === "start") {
     target.x1 = intersection.x;
     target.y1 = intersection.y;
-  } else {
+  } else if (extensionEnd === "end") {
     target.x2 = intersection.x;
     target.y2 = intersection.y;
+  } else {
+    setStatus("Точка пересечения уже лежит в пределах линии.");
+    return;
   }
   pushHistory("Продление линии");
   render();
@@ -1878,25 +1880,40 @@ function printDocument() {
     monochrome: state.printPreview.colorMode === "bw",
   });
   const scale = clamp(state.printPreview.scale || 100, 10, 400);
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html lang="ru">
-    <head>
-      <meta charset="UTF-8">
-      <title>${state.documentName}</title>
-      <style>
-        @page { margin: 12mm; }
-        body { margin: 0; display: grid; place-items: start center; background: white; }
-        .print-sheet { width: ${scale}%; }
-        svg { width: 100%; height: auto; display: block; }
-      </style>
-    </head>
-    <body><div class="print-sheet">${svgMarkup}</div></body>
-    </html>
-  `);
-  printWindow.document.close();
+  populatePrintDocument(printWindow.document, state.documentName, svgMarkup, scale);
   printWindow.focus();
   printWindow.print();
+}
+
+function populatePrintDocument(doc, documentName, svgMarkup, scale) {
+  doc.open();
+  doc.write("<!DOCTYPE html><html lang=\"ru\"><head><meta charset=\"UTF-8\"></head><body></body></html>");
+  doc.close();
+  doc.documentElement.lang = "ru";
+  doc.title = String(documentName || "");
+
+  const style = doc.createElement("style");
+  style.textContent = `
+    @page { margin: 12mm; }
+    body { margin: 0; display: grid; place-items: start center; background: white; }
+    .print-sheet { width: ${clamp(scale || 100, 10, 400)}%; }
+    svg { width: 100%; height: auto; display: block; }
+  `;
+  doc.head.append(style);
+
+  const container = doc.createElement("div");
+  container.className = "print-sheet";
+  container.append(doc.importNode(parseSvgMarkup(svgMarkup), true));
+  doc.body.append(container);
+}
+
+function parseSvgMarkup(svgMarkup) {
+  const parsed = new DOMParser().parseFromString(svgMarkup, "image/svg+xml");
+  const svg = parsed.documentElement;
+  if (!svg || svg.nodeName.toLowerCase() !== "svg") {
+    throw new Error("Не удалось подготовить SVG для печати.");
+  }
+  return svg;
 }
 
 function downloadBlob(blob, filename) {
@@ -2671,12 +2688,7 @@ function rotateEntity(entity, center, degrees) {
   } else if (entity.type === "polyline") {
     entity.points = entity.points.map(rotate);
   } else if (entity.type === "rect") {
-    const corners = getEndpoints(entity).map(rotate);
-    const bounds = getEntityBounds([{ type: "polyline", points: corners }]);
-    entity.x = bounds.minX;
-    entity.y = bounds.minY;
-    entity.width = bounds.maxX - bounds.minX;
-    entity.height = bounds.maxY - bounds.minY;
+    replaceRectWithPolyline(entity, getRectCorners(entity).map(rotate));
   } else if (entity.type === "circle") {
     const rotated = rotate({ x: entity.cx, y: entity.cy });
     entity.cx = rotated.x;
@@ -2748,6 +2760,15 @@ function mirrorEntity(entity, center, axis) {
     if (entity.p2) entity.p2 = mirrorPoint(entity.p2);
     if (entity.center) entity.center = mirrorPoint(entity.center);
   }
+}
+
+function replaceRectWithPolyline(entity, points) {
+  entity.type = "polyline";
+  entity.points = points.length ? [...points, clone(points[0])] : points;
+  delete entity.x;
+  delete entity.y;
+  delete entity.width;
+  delete entity.height;
 }
 
 function createOffsetEntity(entity, amount) {
@@ -2985,6 +3006,34 @@ function pointOnSegment(point, start, end) {
   return point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY;
 }
 
+function getLineExtensionEnd(line, point) {
+  const vector = {
+    x: line.x2 - line.x1,
+    y: line.y2 - line.y1,
+  };
+  const lengthSquared = vector.x ** 2 + vector.y ** 2;
+  if (!lengthSquared) {
+    return null;
+  }
+  const t = ((point.x - line.x1) * vector.x + (point.y - line.y1) * vector.y) / lengthSquared;
+  if (t < 0) {
+    return "start";
+  }
+  if (t > 1) {
+    return "end";
+  }
+  return null;
+}
+
+function getRectCorners(entity) {
+  return [
+    { x: entity.x, y: entity.y },
+    { x: entity.x + entity.width, y: entity.y },
+    { x: entity.x + entity.width, y: entity.y + entity.height },
+    { x: entity.x, y: entity.y + entity.height },
+  ];
+}
+
 function getEntitySegments(entity) {
   if (entity.type === "line") {
     return [{ start: { x: entity.x1, y: entity.y1 }, end: { x: entity.x2, y: entity.y2 } }];
@@ -2996,12 +3045,7 @@ function getEntitySegments(entity) {
     }));
   }
   if (entity.type === "rect") {
-    const corners = [
-      { x: entity.x, y: entity.y },
-      { x: entity.x + entity.width, y: entity.y },
-      { x: entity.x + entity.width, y: entity.y + entity.height },
-      { x: entity.x, y: entity.y + entity.height },
-    ];
+    const corners = getRectCorners(entity);
     return corners.map((corner, index) => ({
       start: corner,
       end: corners[(index + 1) % corners.length],

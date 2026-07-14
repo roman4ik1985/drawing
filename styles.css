@@ -569,3 +569,117 @@ dialog h3 {
     flex-direction: column;
   }
 }
+
+@media (max-width: 720px) {
+  .top-chrome,
+  .workspace-layout {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .top-chrome {
+    padding-top: 12px;
+  }
+
+  .title-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .zoom-controls {
+    width: 100%;
+  }
+
+  .menu-bar {
+    gap: 6px;
+    padding-top: 10px;
+  }
+
+  .tool-bar {
+    padding: 10px 8px;
+  }
+
+  .drafting-shell {
+    min-height: 420px;
+  }
+
+  .workspace-viewport {
+    min-height: 360px;
+  }
+
+  .footer-chrome {
+    position: static;
+  }
+
+  .command-bar,
+  .sheet-bar,
+  .status-bar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .command-bar {
+    gap: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .command-bar-meta span {
+    font-size: 0.9rem;
+  }
+
+  .command-bar-fields {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .command-field {
+    flex: 1 1 140px;
+  }
+
+  .command-field input,
+  .command-field select {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .sheet-bar {
+    align-items: stretch;
+    gap: 10px;
+    padding-top: 8px;
+    padding-bottom: 10px;
+  }
+
+  .sheet-tabs {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .sheet-tab {
+    flex: 0 0 auto;
+    min-width: 94px;
+    padding: 8px 12px;
+  }
+
+  .sheet-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .sheet-actions button {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  .status-bar {
+    gap: 8px;
+    padding-top: 8px;
+    padding-bottom: 10px;
+    font-size: 0.92rem;
+  }
+}

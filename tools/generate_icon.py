@@ -170,7 +170,11 @@ def build_ico() -> bytes:
 
 def main() -> None:
     ASSETS.mkdir(parents=True, exist_ok=True)
-    ICO_PATH.write_bytes(build_ico())
+    icon_bytes = build_ico()
+    if ICO_PATH.exists() and ICO_PATH.read_bytes() == icon_bytes:
+        print(f"Icon unchanged: {ICO_PATH}")
+        return
+    ICO_PATH.write_bytes(icon_bytes)
     print(f"Wrote {ICO_PATH}")
 
 

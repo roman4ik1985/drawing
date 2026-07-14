@@ -17,8 +17,7 @@ import webview
 
 APP_TITLE = "Учебное двумерное черчение"
 UI_HOST = "127.0.0.1"
-BACKEND_HOST = "127.0.0.1"
-BACKEND_PORT = 8765
+BACKEND_CONFIG_ENV = "DRAWING_DWG_CONFIG"
 
 
 def runtime_root() -> Path:
@@ -53,7 +52,29 @@ def start_ui_server() -> tuple[ThreadingHTTPServer, int]:
     return server, port
 
 
-def run_embedded_backend() -> None:
+def resolve_backend_config() -> Path | None:
+    override = os.environ.get(BACKEND_CONFIG_ENV)
+    if override:
+        override_path = Path(override).expanduser()
+        if override_path.exists():
+            return override_path
+        return None
+    if BACKEND_CONFIG.exists():
+        return BACKEND_CONFIG
+    return None
+
+
+def resolve_backend_config_from_args(argv: list[str]) -> Path | None:
+    if "--config" not in argv:
+        return resolve_backend_config()
+    index = argv.index("--config")
+    if index + 1 >= len(argv):
+        return None
+    config_path = Path(argv[index + 1]).expanduser()
+    return config_path if config_path.exists() else None
+
+
+def run_embedded_backend(config_path: Path) -> None:
     spec = importlib.util.spec_from_file_location("dwg_service", BACKEND_SCRIPT)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Cannot load backend module from {BACKEND_SCRIPT}")
@@ -61,23 +82,23 @@ def run_embedded_backend() -> None:
     spec.loader.exec_module(module)
     saved_argv = sys.argv[:]
     try:
-        sys.argv = [str(BACKEND_SCRIPT), "--config", str(BACKEND_CONFIG)]
+        sys.argv = [str(BACKEND_SCRIPT), "--config", str(config_path)]
         module.main()
     finally:
         sys.argv = saved_argv
 
 
-def start_dwg_backend() -> subprocess.Popen[str] | None:
-    if not BACKEND_SCRIPT.exists() or not BACKEND_CONFIG.exists():
+def start_dwg_backend(config_path: Path | None) -> subprocess.Popen[str] | None:
+    if not BACKEND_SCRIPT.exists() or config_path is None:
         return None
 
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
     command = [sys.executable]
     if getattr(sys, "frozen", False):
-        command.append("--run-backend")
+        command.extend(["--run-backend", "--config", str(config_path)])
     else:
-        command.extend([str(Path(__file__).resolve()), "--run-backend"])
+        command.extend([str(Path(__file__).resolve()), "--run-backend", "--config", str(config_path)])
     return subprocess.Popen(
         command,
         cwd=str(BACKEND_DIR),
@@ -101,11 +122,15 @@ def stop_backend(process: subprocess.Popen[str] | None) -> None:
 
 def main() -> None:
     if "--run-backend" in sys.argv:
-        run_embedded_backend()
+        config_path = resolve_backend_config_from_args(sys.argv)
+        if config_path is None:
+            raise SystemExit(0)
+        run_embedded_backend(config_path)
         return
 
+    config_path = resolve_backend_config()
     ui_server, port = start_ui_server()
-    backend_process = start_dwg_backend()
+    backend_process = start_dwg_backend(config_path)
 
     def cleanup() -> None:
         stop_backend(backend_process)
