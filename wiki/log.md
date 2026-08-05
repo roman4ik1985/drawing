@@ -9,3 +9,4 @@
 - [2026-07-14 08:59] handoff - wiki/synthesis/2026-07-14-audit-handoff.md, wiki/log.md - Corrected the post-savepoint handoff: 127.0.0.1:8000 belongs to C:\my-erp-system\data-ai-service, so it was left running as an unrelated runtime and not treated as a drawing repo cleanup target.
 - [2026-07-14 09:06] handoff - wiki/synthesis/2026-07-14-audit-handoff.md, wiki/log.md - Finalized the audit as a local-only closure on main: no push or PR was chosen, the handoff now reflects that no further repository action is required unless publication is requested later.
 - [2026-08-06 00:54] query - github_sync - GitHub_sync_verified_and_main_pushed
+- [2026-08-06 00:59] handoff - wiki_log - savepoint_before_chat_archive
