@@ -1,67 +1,57 @@
 [CmdletBinding()]
 param(
+    [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot),
+    [string]$LogPath = '',
     [Parameter(Mandatory = $true)]
     [ValidateSet('ingest', 'query', 'lint', 'config', 'implementation', 'savepoint', 'handoff', 'closure')]
     [string]$Type,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Files,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Summary,
-
-    [string]$LogPath = ''
+    [Parameter(Mandatory = $true)][string]$Files,
+    [Parameter(Mandatory = $true)][string]$Summary,
+    [string]$Timestamp = '',
+    [ValidateRange(0.05, 60.0)][double]$LockTimeoutSeconds = 10.0
 )
 
-$importantTypes = @('implementation', 'config', 'savepoint', 'handoff', 'closure')
+$ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'WikiLog.Common.ps1')
 
-if (-not $LogPath) {
-    $LogPath = [System.IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $PSCommandPath) '..\wiki\log.md'))
+Assert-WikiLogField -Name 'Files' -Value $Files
+Assert-WikiLogField -Name 'Summary' -Value $Summary
+$effectiveTimestamp = Get-WikiLogTimestamp -Timestamp $Timestamp
+$effectiveType = $Type.ToLowerInvariant()
+$row = "- [$effectiveTimestamp] $effectiveType - $Files - $Summary"
+$rowBytes = $script:WikiLogUtf8NoBom.GetBytes("$row`n")
+$resolvedPath = Resolve-WikiLogPath -ProjectRoot $ProjectRoot -LogPath $LogPath
+$parent = Split-Path -Parent $resolvedPath
+if (-not (Test-Path -LiteralPath $parent -PathType Container)) {
+    [System.IO.Directory]::CreateDirectory($parent) | Out-Null
 }
 
-if (-not (Test-Path -LiteralPath $LogPath)) {
-    throw "Log file not found: $LogPath"
-}
-
-$parent = Split-Path -Parent $LogPath
-if ($parent -and -not (Test-Path -LiteralPath $parent)) {
-    throw "Log directory not found: $parent"
-}
-
-$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm'
-$line = "- [$timestamp] $Type - $Files - $Summary"
-
-$fileInfo = Get-Item -LiteralPath $LogPath
-$needsSeparator = $fileInfo.Length -gt 0
-
-if ($needsSeparator) {
-    $stream = [System.IO.File]::Open($LogPath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
-    try {
-        $stream.Seek(-1, [System.IO.SeekOrigin]::End) | Out-Null
-        $lastByte = $stream.ReadByte()
-        $needsSeparator = $lastByte -ne 10
-    } finally {
-        $stream.Dispose()
-    }
-}
-
-$writer = New-Object System.IO.StreamWriter(
-    [System.IO.File]::Open($LogPath, [System.IO.FileMode]::Append, [System.IO.FileAccess]::Write, [System.IO.FileShare]::Read),
-    (New-Object System.Text.UTF8Encoding($false))
-)
-
+$stream = $null
+$rollbackLength = $null
 try {
-    $writer.NewLine = "`n"
-    if ($needsSeparator) {
-        $writer.WriteLine()
+    $stream = Open-WikiLogExclusive -Path $resolvedPath -Mode OpenOrCreate -LockTimeoutSeconds $LockTimeoutSeconds
+    if ($stream.Length -eq 0) {
+        Write-WikiLogBytes -Stream $stream -Bytes (Get-WikiLogInitialBytes)
     }
-    $writer.WriteLine($line)
-} finally {
-    $writer.Dispose()
+    $preflight = Test-WikiLogBytes -Bytes (Read-WikiLogBytes -Stream $stream) -Path $resolvedPath
+    $rollbackLength = $stream.Length
+    try {
+        $stream.Position = $stream.Length
+        $stream.Write($rowBytes, 0, $rowBytes.Length)
+        $stream.Flush($true)
+        $postcheck = Test-WikiLogBytes -Bytes (Read-WikiLogBytes -Stream $stream) -Path $resolvedPath
+        if ($postcheck.RowCount -ne ($preflight.RowCount + 1) -or
+            -not $postcheck.Text.EndsWith("$row`n", [System.StringComparison]::Ordinal)) {
+            throw 'FAIL: wiki-log post-check did not observe exactly the appended row.'
+        }
+    }
+    catch {
+        if ($null -ne $rollbackLength) {
+            $stream.SetLength([long]$rollbackLength)
+            $stream.Flush($true)
+        }
+        throw
+    }
+    Write-Output $row
 }
-
-if ($importantTypes -contains $Type) {
-    Get-Content -LiteralPath $LogPath -Tail 5
-} else {
-    Write-Output $line
-}
+finally { Close-WikiLogExclusive -Stream $stream }

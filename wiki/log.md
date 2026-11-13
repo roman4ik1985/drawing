@@ -12,4 +12,6 @@
 - [2026-08-06 00:59] handoff - wiki_log - savepoint_before_chat_archive
 - [2026-09-07 19:59] closure - C:\Projects\drawing; C:\drawing; C:\Projects\_relocation-recovery\2026-09-07\drawing - Recovered canonical Git metadata from remote main 84240a9 after exact snapshots of both roots; fsck, HTTP 200 and regression smoke passed; old root and corrupt Git metadata retained as rollback; no deletion, branch switch, commit, or push.
 - [2026-11-13 11:52] implementation - README.md; backend/*.ps1; build_exe.ps1; scripts/*.ps1; wiki/* - Made project paths portable after relocation, corrected the duplicated logger branch, and passed PowerShell syntax checks before publication.
+<!-- wiki-log-canonical-v1 -->
 - [2026-11-13 11:54] closure - wiki/log.md - ABP completed: published audit contour verified at 6777d77 on origin/main; continuation: no; handoff: not-required; local DrawingApp.spec EOL state and logs directory parked outside publication.
+- [2026-11-13 14:32] closure - scripts/append-wiki-log.ps1; scripts/check-wiki-log.ps1; scripts/WikiLog.Common.ps1; wiki/log.md; C:\Users\roman\.codex\sqlite\codex-dev.db - Reconciled six sidebar cwd rows: old active cwd=0, 6/6 readback and SQLite quick_check PASS; installed canonical locked logger/checker; continuation: no; handoff: not-required.
