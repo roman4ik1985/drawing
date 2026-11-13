@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [string]$ExePath = "C:\drawing\dist\DrawingApp.exe",
+  [string]$ExePath = "",
   [int]$StartupTimeoutSec = 20
 )
 
@@ -14,6 +14,10 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
 $repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
 $backendDir = Join-Path $repoRoot "backend"
 $mockConfigPath = Join-Path $backendDir "dwg-service.mock.json"
+
+if ([string]::IsNullOrWhiteSpace($ExePath)) {
+  $ExePath = Join-Path $repoRoot "dist\DrawingApp.exe"
+}
 
 if (-not (Test-Path -LiteralPath $ExePath)) {
   throw "Desktop executable not found: $ExePath"

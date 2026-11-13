@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('ingest', 'query', 'lint', 'config', 'implementation', 'handoff')]
+    [ValidateSet('ingest', 'query', 'lint', 'config', 'implementation', 'savepoint', 'handoff', 'closure')]
     [string]$Type,
 
     [Parameter(Mandatory = $true)]
@@ -13,7 +13,7 @@ param(
     [string]$LogPath = ''
 )
 
-$importantTypes = @('implementation', 'config', 'handoff')
+$importantTypes = @('implementation', 'config', 'savepoint', 'handoff', 'closure')
 
 if (-not $LogPath) {
     $LogPath = [System.IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $PSCommandPath) '..\wiki\log.md'))

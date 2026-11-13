@@ -16,12 +16,12 @@ Desktop packaging audit is closed; preserve the verified savepoint and publish o
 
 ## Next Steps
 - No further repository action is required unless publication is explicitly requested later.
-- If icon artwork changes are needed later, run `powershell -ExecutionPolicy Bypass -File C:\drawing\build_exe.ps1 -RegenerateIcon` intentionally and review the binary diff before commit.
-- Keep using `pwsh -ExecutionPolicy Bypass -File C:\drawing\scripts\desktop-smoke.ps1` after desktop-related edits.
+- If icon artwork changes are needed later, run `powershell -ExecutionPolicy Bypass -File .\build_exe.ps1 -RegenerateIcon` intentionally and review the binary diff before commit.
+- Keep using `pwsh -ExecutionPolicy Bypass -File .\scripts\desktop-smoke.ps1` after desktop-related edits.
 
 ## Key Files
-- `C:\drawing\build_exe.ps1`
-- `C:\drawing\desktop_app.py`
-- `C:\drawing\scripts\regression-smoke.js`
-- `C:\drawing\scripts\desktop-smoke.ps1`
-- `C:\drawing\README.md`
+- `.\build_exe.ps1`
+- `.\desktop_app.py`
+- `.\scripts\regression-smoke.js`
+- `.\scripts\desktop-smoke.ps1`
+- `.\README.md`

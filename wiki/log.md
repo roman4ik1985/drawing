@@ -10,3 +10,5 @@
 - [2026-07-14 09:06] handoff - wiki/synthesis/2026-07-14-audit-handoff.md, wiki/log.md - Finalized the audit as a local-only closure on main: no push or PR was chosen, the handoff now reflects that no further repository action is required unless publication is requested later.
 - [2026-08-06 00:54] query - github_sync - GitHub_sync_verified_and_main_pushed
 - [2026-08-06 00:59] handoff - wiki_log - savepoint_before_chat_archive
+- [2026-09-07 19:59] closure - C:\Projects\drawing; C:\drawing; C:\Projects\_relocation-recovery\2026-09-07\drawing - Recovered canonical Git metadata from remote main 84240a9 after exact snapshots of both roots; fsck, HTTP 200 and regression smoke passed; old root and corrupt Git metadata retained as rollback; no deletion, branch switch, commit, or push.
+- [2026-11-13 11:52] implementation - README.md; backend/*.ps1; build_exe.ps1; scripts/*.ps1; wiki/* - Made project paths portable after relocation, corrected the duplicated logger branch, and passed PowerShell syntax checks before publication.

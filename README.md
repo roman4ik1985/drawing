@@ -1,6 +1,6 @@
 # Учебное двумерное черчение
 
-Статическое веб-приложение для учебного двумерного черчения по приложенному техническому заданию. Проект не требует сборки: достаточно открыть [index.html](C:/drawing/index.html) в браузере или запустить локальный HTTP-сервер в каталоге `C:\drawing`.
+Статическое веб-приложение для учебного двумерного черчения по приложенному техническому заданию. Проект не требует сборки: достаточно открыть [index.html](index.html) в браузере или запустить локальный HTTP-сервер в каталоге корня проекта.
 
 ## Что реализовано
 
@@ -29,8 +29,8 @@
 
 ## Быстрый запуск
 
-1. Откройте [index.html](C:/drawing/index.html) в браузере.
-2. Либо запустите из `C:\drawing`:
+1. Откройте [index.html](index.html) в браузере.
+2. Либо запустите из корня проекта:
 
 ```powershell
 python -m http.server 8000
@@ -46,16 +46,16 @@ python -m http.server 8000
 2. При первом запуске один раз установите desktop-зависимости:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File C:\drawing\build_exe.ps1 -BootstrapDependencies
+powershell -ExecutionPolicy Bypass -File .\build_exe.ps1 -BootstrapDependencies
 ```
 
 3. Запустите обычную сборку:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File C:\drawing\build_exe.ps1
+powershell -ExecutionPolicy Bypass -File .\build_exe.ps1
 ```
 
-4. Готовый файл приложения появится в каталоге `C:\drawing\dist`.
+4. Готовый файл приложения появится в каталоге `.\dist`.
 
 Обычная пересборка не переустанавливает `pywebview`/`pyinstaller` и не перегенерирует `assets/drawing_app.ico`. Для осознанного обновления иконки используйте `-RegenerateIcon`.
 
@@ -65,11 +65,10 @@ powershell -ExecutionPolicy Bypass -File C:\drawing\build_exe.ps1
 
 ## Smoke-проверки
 
-Для browser/runtime smoke используйте:
+Команды ниже выполняются из корня проекта. Для browser/runtime smoke нужны Node.js, Playwright и установленный Chromium:
 
 ```powershell
-$env:NODE_PATH='C:\Users\roman\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules;C:\Users\roman\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules\.pnpm\node_modules'
-C:\Users\roman\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe C:\drawing\scripts\regression-smoke.js
+node .\scripts\regression-smoke.js
 ```
 
 Сценарий проверяет геометрию, импорт JSON, сохранение, `Save As`, `DWG offline/online` и `print preview`.
@@ -77,7 +76,7 @@ C:\Users\roman\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin
 Для desktop smoke после сборки используйте:
 
 ```powershell
-pwsh -ExecutionPolicy Bypass -File C:\drawing\scripts\desktop-smoke.ps1
+pwsh -ExecutionPolicy Bypass -File .\scripts\desktop-smoke.ps1
 ```
 
 Скрипт сам создаёт временный mock-конфиг, запускает `DrawingApp.exe`, проверяет UI-порт и ответ встроенного backend на `127.0.0.1:8765`, а затем завершает процесс и удаляет временные файлы. Для этого smoke нужен PowerShell 7+.
@@ -93,17 +92,17 @@ pwsh -ExecutionPolicy Bypass -File C:\drawing\scripts\desktop-smoke.ps1
 
 Фронтенд ожидает сервис на `http://127.0.0.1:8765`.
 
-1. Скопируйте [dwg-service.example.json](C:/drawing/backend/dwg-service.example.json) в `C:\drawing\backend\dwg-service.json`.
+1. Скопируйте [dwg-service.example.json](backend/dwg-service.example.json) в `.\backend\dwg-service.json`.
 2. Для `ODA File Converter` по умолчанию используется путь `C:\Program Files\ODA\ODAFileConverter\ODAFileConverter.exe`. Если программа установлена в другое место, измените первый элемент `converter.command_template`.
 3. Запустите:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File C:\drawing\backend\start-dwg-service.ps1 -Config C:\drawing\backend\dwg-service.json
+powershell -ExecutionPolicy Bypass -File .\backend\start-dwg-service.ps1
 ```
 
 Если `dwg-service.json` ещё не существует, `start-dwg-service.ps1` создаст его из шаблона и завершится. После этого отредактируйте конфиг и запустите команду повторно.
 
-Для локальной проверки без CAD-конвертера можно использовать [dwg-service.mock.json](C:/drawing/backend/dwg-service.mock.json). Он проверяет связку frontend/backend, но не создаёт настоящий DWG.
+Для локальной проверки без CAD-конвертера можно использовать [dwg-service.mock.json](backend/dwg-service.mock.json). Он проверяет связку frontend/backend, но не создаёт настоящий DWG.
 
 ## Горячие клавиши
 

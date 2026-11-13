@@ -1,11 +1,15 @@
 param(
-  [string]$Config = "C:\drawing\backend\dwg-service.json"
+  [string]$Config = ""
 )
 
-Set-Location "C:\drawing\backend"
+Set-Location -LiteralPath $PSScriptRoot
+
+if ([string]::IsNullOrWhiteSpace($Config)) {
+  $Config = Join-Path $PSScriptRoot "dwg-service.json"
+}
 
 $configPath = [System.IO.Path]::GetFullPath($Config)
-$examplePath = "C:\drawing\backend\dwg-service.example.json"
+$examplePath = Join-Path $PSScriptRoot "dwg-service.example.json"
 
 if (-not (Test-Path -LiteralPath $configPath)) {
   if (-not (Test-Path -LiteralPath $examplePath)) {

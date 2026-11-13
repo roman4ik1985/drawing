@@ -1,5 +1,5 @@
 param(
-  [string]$Config = "C:\drawing\backend\dwg-service.json",
+  [string]$Config = "",
   [string[]]$SearchRoots = @(
     "C:\Program Files",
     "C:\Program Files (x86)"
@@ -9,6 +9,10 @@ param(
     "TeighaFileConverter.exe"
   )
 )
+
+if ([string]::IsNullOrWhiteSpace($Config)) {
+  $Config = Join-Path $PSScriptRoot "dwg-service.json"
+}
 
 $configPath = [System.IO.Path]::GetFullPath($Config)
 

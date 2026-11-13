@@ -6,7 +6,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-Set-Location "C:\drawing"
+Set-Location -LiteralPath $PSScriptRoot
 
 function Test-PythonModule {
     param(
